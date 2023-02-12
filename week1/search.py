@@ -94,14 +94,20 @@ def query():
     print("query obj: {}".format(query_obj))
 
     #### Step 4.b.ii
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
-    # Postprocess results here if you so desire
-
-    #print(response)
+    response = opensearch.search(
+        body=query_obj,
+        index='bbuy_products'
+    )
+    
+    print(response)
     if error is None:
-        return render_template("search_results.jinja2", query=user_query, search_response=response,
-                               display_filters=display_filters, applied_filters=applied_filters,
-                               sort=sort, sortDir=sortDir)
+        return render_template("search_results.jinja2", 
+                            query=user_query, 
+                            search_response=response,
+                            display_filters=display_filters, 
+                            applied_filters=applied_filters,
+                            sort=sort, 
+                            sortDir=sortDir)
     else:
         redirect(url_for("index"))
 
@@ -125,17 +131,22 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                     "phrase_slop": 3
                 }
             }],
-            "filter": [        
-            ]
+            "filter": filters
             }
         },
             "sort" : [
                 {sort : {
-                    "order" : sortDir,
-                    "missing" : "_last",
-                    "unmapped_type" : "text"
+                    "order" : sortDir
                 }}
-            ]
+            ],
+            "aggs": {
+                "department": {
+                    "terms": {"field": "department.keyword"}
+                },
+                "missing_images":{
+                    "missing": { "field": "image.keyword" }
+                }
+            }
         }
     
     return query_obj

@@ -119,13 +119,7 @@
             }
           },
           "customerReviewAverage": {
-            "type": "float",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
+            "type": "float"
           },
           "customerReviewCount": {
             "type": "integer",
@@ -164,13 +158,7 @@
             }
           },
           "description": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
+            "type": "text"
           },
           "digital": {
             "type": "boolean"
@@ -233,13 +221,7 @@
             }
           },
           "longDescription": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "text",
-                "analyzer": "english"
-              }
-            }
+            "type": "text"
           },
           "longDescriptionHtml": {
             "type": "text",
@@ -270,10 +252,11 @@
           },
           "name": {
             "type": "text",
+            "analyzer": "english",
             "fields": {
               "keyword": {
-                "type": "text",
-                "analyzer": "english"
+                "type": "keyword",
+                "ignore_above": 256
               }
             }
           },
@@ -308,13 +291,7 @@
             }
           },
           "regularPrice": {
-            "type": "float",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
+            "type": "float"
           },
           "relatedProducts": {
             "type": "text",
@@ -335,13 +312,7 @@
             }
           },
           "salePrice": {
-            "type": "float",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
+            "type": "float"
           },
           "salesRankLongTerm": {
             "type": "integer",
@@ -389,13 +360,7 @@
             }
           },
           "shortDescription": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "text",
-                "analyzer": "english"
-              }
-            }
+            "type": "text"
           },
           "shortDescriptionHtml": {
             "type": "text",

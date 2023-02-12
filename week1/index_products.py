@@ -144,7 +144,7 @@ def index_file(file, index_name):
 @click.option('--index_name', '-i', default="bbuy_products", help="The name of the index to write to")
 @click.option('--workers', '-w', default=8, help="The number of workers to use to process files")
 def main(source_dir: str, index_name: str, workers: int):
-    files = glob.glob(source_dir + "/*.xml")
+    files = glob.glob(source_dir + "/*.xml")[:10]
     docs_indexed = 0
     start = perf_counter()
     with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
