@@ -108,14 +108,34 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
-    query_obj = {
-        'size': 10,
-        "query": {
-            "match_all": {} # Replace me with a query that both searches and filters
-        },
-        "aggs": {
-            #### Step 4.b.i: create the appropriate query and aggregations here
+    #### Step 4.b.i: create the appropriate query and aggregations here
 
+    query_obj = {
+        "size": 10, 
+        "query": {
+            "bool": {
+            "must": [{
+                "query_string":{
+                    "fields":[
+                        "name^10",
+                        "shortDescription^2",
+                        "longDescription"
+                    ],
+                    "query": user_query,
+                    "phrase_slop": 3
+                }
+            }],
+            "filter": [        
+            ]
+            }
+        },
+            "sort" : [
+                {sort : {
+                    "order" : sortDir,
+                    "missing" : "_last",
+                    "unmapped_type" : "text"
+                }}
+            ]
         }
-    }
+    
     return query_obj

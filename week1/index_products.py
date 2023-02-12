@@ -134,7 +134,7 @@ def index_file(file, index_name):
 
     for i in range(len(indices)-1):
         chunk = docs[indices[i]:indices[i+1]]
-        print(f'Bulking {len(chunk)} docs in {file}: {indices[i]} to {indices[i+1]}')
+        logger.info(f'Bulking {len(chunk)} docs in {file}: {indices[i]} to {indices[i+1]}')
         bulk(client, chunk)
 
     return docs_indexed
