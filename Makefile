@@ -1,4 +1,4 @@
-.ONESHELL:
+ls.ONESHELL:
 
 .PHONY: week1 week2 download delete index
 
