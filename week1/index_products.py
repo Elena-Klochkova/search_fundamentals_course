@@ -81,10 +81,10 @@ mappings =  [
         ]
 
 def get_opensearch():
+
     host = 'localhost'
     port = 9200
     auth = ('admin', 'admin')
-    #### Step 2.a: Create a connection to OpenSearch
     client = OpenSearch(
         hosts=[{'host': host, 'port': port}],
         http_compress=True,  # enables gzip compression for request bodies
@@ -95,9 +95,9 @@ def get_opensearch():
         verify_certs=False,
         ssl_assert_hostname=False,
         ssl_show_warn=False,
+        #ca_certs=ca_certs_path
     )
     return client
-
 
 def index_file(file, index_name):
     docs_indexed = 0
@@ -107,44 +107,35 @@ def index_file(file, index_name):
     root = tree.getroot()
     children = root.findall("./product")
     docs = []
-
     for child in children:
         doc = {}
         for idx in range(0, len(mappings), 2):
             xpath_expr = mappings[idx]
             key = mappings[idx + 1]
             doc[key] = child.xpath(xpath_expr)
+        #print(doc)
         if 'productId' not in doc or len(doc['productId']) == 0:
             continue
-        #### Step 2.b: Create a valid OpenSearch Doc and bulk index 2000 docs at a time
-        the_doc = {}
-        for k, v in doc.items():
-            try:
-                the_doc[k] = ','.join(v)
-            except TypeError:
-                the_doc[k] = v
-        the_doc['_index'] = index_name
-        the_doc['_id'] = ','.join(doc['productId'])
-        docs.append(the_doc)
-        # print(f'DOC: {the_doc}')
+
+        docs.append({'_index': index_name, '_id':doc['sku'][0], '_source' : doc})
         docs_indexed += 1
-
-    chunk_size = 2000
-    indices = list(range(0, len(docs)+chunk_size, chunk_size))
-
-    for i in range(len(indices)-1):
-        chunk = docs[indices[i]:indices[i+1]]
-        logger.info(f'Bulking {len(chunk)} docs in {file}: {indices[i]} to {indices[i+1]}')
-        bulk(client, chunk)
-
+        if docs_indexed % 200 == 0:
+            bulk(client, docs, request_timeout=120)
+            #logger.info(f'{docs_indexed} documents indexed')
+            docs = []
+    if len(docs) > 0:
+        bulk(client, docs, request_timeout=60)
+        logger.info(f'{docs_indexed} documents indexed')
     return docs_indexed
+
 
 @click.command()
 @click.option('--source_dir', '-s', help='XML files source directory')
 @click.option('--index_name', '-i', default="bbuy_products", help="The name of the index to write to")
 @click.option('--workers', '-w', default=8, help="The number of workers to use to process files")
 def main(source_dir: str, index_name: str, workers: int):
-    files = glob.glob(source_dir + "/*.xml")[:10]
+
+    files = glob.glob(source_dir + "/*.xml")
     docs_indexed = 0
     start = perf_counter()
     with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:

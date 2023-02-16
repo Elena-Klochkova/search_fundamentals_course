@@ -117,14 +117,21 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
     #### Step 4.b.i: create the appropriate query and aggregations here
 
     query_obj = {
-        "size": 10, 
+        "size": 10,
+        "highlight": {
+            "fields": {
+                "name": {},
+                "shortDescription": {},
+                "longDescription": {}
+            }
+        },
         "query": {
             "bool": {
             "must": [{
                 "query_string":{
                     "fields":[
                         "name^10",
-                        "shortDescription^2",
+                        "shortDescription^5",
                         "longDescription"
                     ],
                     "query": user_query,
@@ -139,14 +146,37 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                     "order" : sortDir
                 }}
             ],
-            "aggs": {
-                "department": {
-                    "terms": {"field": "department.keyword"}
+        "aggs": {
+            "department": {
+                "terms": {
+                    "field": "department.keyword",
+                    "min_doc_count": 1
+                }
+            },
+            "missing_images": {
+                "missing": {
+                    "field": "image"
+                }
+            },
+            "regularPrice": {
+                "range": {
+                    "field": "regularPrice",
+                    "ranges": [
+                        {"key": "$", "to": 100},
+                        {"key": "$$", "from": 100, "to": 200},
+                        {"key": "$$$", "from": 200, "to": 300},
+                        {"key": "$$$$", "from": 300, "to": 400},
+                        {"key": "$$$$$", "from": 400, "to": 500},
+                        {"key": "$$$$$$", "from": 500},
+                    ]
                 },
-                "missing_images":{
-                    "missing": { "field": "image.keyword" }
+                "aggs": {
+                    "price_stats": {
+                        "stats": {"field": "regularPrice"}
+                    }
                 }
             }
         }
+    }
     
     return query_obj
