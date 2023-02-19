@@ -63,13 +63,33 @@ def autocomplete():
         prefix = request.args.get("prefix")
         print(f"Prefix: {prefix}")
         if prefix is not None:
+            opensearch = get_opensearch()
             type = request.args.get("type", "queries") # If type == queries, this is an autocomplete request, else if products, it's an instant search request.
             ##### W2, L3, S1
-            search_response = None
+
+            query_obj = {
+                "suggest": {
+                    "autocomplete": {
+                    "prefix": prefix,
+                        "completion": {
+                            "field": "suggest",
+                            "skip_duplicates": "true"
+                        }
+                    }
+                }
+            }
+
+            search_response = opensearch.search(
+                body=query_obj, 
+                index=f"bbuy_{type}",
+                # explain=explain
+            )
+
             print("TODO: implement autocomplete AND instant search")
             if (search_response and search_response['suggest']['autocomplete'] and search_response['suggest']['autocomplete'][0]['length'] > 0): # just a query response
                 results = search_response['suggest']['autocomplete'][0]['options']
     print(f"Results: {results}")
+
     return {"completions": results}
 
 @bp.route('/query', methods=['GET', 'POST'])
@@ -135,8 +155,6 @@ def query():
     response = opensearch.search(body=query_obj, index="bbuy_products", explain=explain)
     # Postprocess results here if you so desire
 
-    print(response)
-    
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,

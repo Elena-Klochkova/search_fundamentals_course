@@ -150,6 +150,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", size=10, in
 
     if include_aggs:
         add_aggs(query_obj)
+        
     return query_obj
 
 
