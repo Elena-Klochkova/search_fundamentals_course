@@ -82,7 +82,7 @@ def autocomplete():
             search_response = opensearch.search(
                 body=query_obj,
                 index=f"bbuy_{type}",
-                explain=True
+                explain="true"
             )
 
             print("TODO: implement autocomplete AND instant search")
